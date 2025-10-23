@@ -10,20 +10,40 @@ jobs:
   seed:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
       - name: Download template ZIP from release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -euo pipefail
+          # 1) Download from a *Release* named "seed-assets" (not just a git tag)
           gh release download seed-assets \
             -p "opendhc-template.zip" \
             -R "${{ github.repository }}"
-          unzip -q opendhc-template.zip -d /tmp
-          rsync -a --delete /tmp/OpenDHC/ ./
+
+          # 2) Unzip to a temp directory
+          rm -rf /tmp/opendhc_zip
+          mkdir -p /tmp/opendhc_zip
+          unzip -q opendhc-template.zip -d /tmp/opendhc_zip
+
+          # 3) Copy into the repo WITHOUT touching .git or this workflow file
+          rsync -a /tmp/opendhc_zip/OpenDHC/ ./ \
+            --exclude='.git/' \
+            --exclude='.github/workflows/seed-opendhc.yml'
+
+          # 4) Sanity check: ensure we're still in a git repo
+          git rev-parse --is-inside-work-tree
+
+          # 5) Optional: show a quick summary
+          git status --porcelain=v1 || true
+          ls -la .github/workflows || true
+
+          # 6) Clean up
           rm -f opendhc-template.zip
 
-      - name: Open PR
+      - name: Create PR
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
