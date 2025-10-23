@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=OpenDHC
+Comment=Linux-native frontend for chdman (create/verify/extract CHD)
+Exec=OpenDHC
+Icon=opendhc
+Categories=Utility;Graphics;Qt;
+Terminal=false
