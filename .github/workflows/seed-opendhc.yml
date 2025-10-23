@@ -1,0 +1,38 @@
+name: Seed OpenDHC from Release ZIP (PR)
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download template ZIP from release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release download seed-assets \
+            -p "opendhc-template.zip" \
+            -R "${{ github.repository }}"
+          unzip -q opendhc-template.zip -d /tmp
+          rsync -a --delete /tmp/OpenDHC/ ./
+          rm -f opendhc-template.zip
+
+      - name: Open PR
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: seed/opendhc-template
+          base: main
+          title: "seed: add OpenDHC project files (Qt6 + AppImage + zsync)"
+          commit-message: "seed: add OpenDHC project files"
+          body: |
+            This PR seeds the repository with the OpenDHC template:
+            - Qt6/QML sources, batch processing, per-job progress, final report (CSV)
+            - AppImage packaging via linuxdeploy + plugin-qt with zsync update info
+            - CI workflow builds .AppImage + .zsync on tags and attaches to Releases
