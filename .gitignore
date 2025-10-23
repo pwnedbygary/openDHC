@@ -1,0 +1,10 @@
+build/
+AppDir/
+*.AppImage
+*.zsync
+CMakeCache.txt
+CMakeFiles/
+*.user
+*.pro.user
+*.qmlc
+*.jsc
