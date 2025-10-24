@@ -285,4 +285,4 @@ ApplicationWindow {
         }
     }
 }
-``
+// Fixed syntax error: removed invalid token
